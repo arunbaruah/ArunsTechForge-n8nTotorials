@@ -1,0 +1,1 @@
+You can download these files and you it for your personal use. Please make sure you enter your own credentials and Google Drive links, You cannot access my folders. So you need to modify the Google Drive Upload node whenever you use.
