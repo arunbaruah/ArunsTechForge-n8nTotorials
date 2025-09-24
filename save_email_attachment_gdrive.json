@@ -1,0 +1,281 @@
+{
+  "name": "save_attachment_gdrive",
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "6dc49015-d466-44cf-b206-8054744d64b6",
+              "leftValue": "={{ $('Gmail Trigger').item.binary.keys() }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -224,
+        0
+      ],
+      "id": "522f6e93-1686-4a80-9e3f-ddd9e7551264",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "messageId": "={{ $json.id }}",
+        "simple": false,
+        "options": {
+          "downloadAttachments": true
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -16,
+        0
+      ],
+      "id": "a5ba3b10-af7c-466a-83bb-5b9f15d11008",
+      "name": "Get a message",
+      "webhookId": "25a33f2c-69a7-4fbd-ae32-3e992f36c626",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "i7GmkvQZTygnmpuw",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4d57decf-b5f8-407b-bc62-3fb8e13b2145",
+              "name": "attachments",
+              "value": "={{ $('Get a message').item.binary.keys() }}",
+              "type": "array"
+            },
+            {
+              "id": "4dc901d6-d335-4d87-97c9-652b85dba976",
+              "name": "message_id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        192,
+        -160
+      ],
+      "id": "fcd7e8e8-0c15-4db7-be88-d8b747329982",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "attachments",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        400,
+        -160
+      ],
+      "id": "c1f9e203-bb15-4029-a3c5-003541e55888",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "message_id",
+              "field2": "id"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        400,
+        128
+      ],
+      "id": "64838510-e35c-4dec-98c9-f78fd7c75c65",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "={{ $json.attachments }}",
+        "name": "={{ $json.subject }}_{{ $('Merge').item.json.attachments }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1n-8tPTenz3ex_CD1QQqk71Vj1AxLPn5b",
+          "mode": "list",
+          "cachedResultName": "ArunsForge",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1n-8tPTenz3ex_CD1QQqk71Vj1AxLPn5b"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        624,
+        128
+      ],
+      "id": "6d39c354-dacd-4bd8-beab-f0c23b65b3df",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "YS69lCi5JSiuhya6",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "sender": "dr.arunbaruah@yahoo.in"
+        },
+        "options": {
+          "downloadAttachments": true
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -464,
+        0
+      ],
+      "id": "122349e7-272f-4d7f-8b62-90872d4e35f6",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "i7GmkvQZTygnmpuw",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Get a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a message": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "cb988337-d544-4b4f-85cb-44dd2f1bb67f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e6ecfdc46bac42ecbc2672ed3f1eb11f19b35b05eae5e305021f1de242e4347b"
+  },
+  "id": "Hfdmg8VahYtn74AK",
+  "tags": []
+}
