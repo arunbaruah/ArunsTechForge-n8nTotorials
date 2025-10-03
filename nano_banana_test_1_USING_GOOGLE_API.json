@@ -1,0 +1,142 @@
+{
+  "name": "nano_banana_test_1_USING_GOOGLE_API",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Test",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Prompt",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "File",
+              "fieldType": "file",
+              "acceptFileTypes": "jpg,png",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        -432,
+        -96
+      ],
+      "id": "b1135389-52a6-4aa9-9d0f-bfb938622872",
+      "name": "On form submission",
+      "webhookId": "c4b633fc-7773-4b19-bf0f-d1d576b5dcdc"
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "binaryPropertyName": "File",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        -96
+      ],
+      "id": "68e0ad4b-e917-44e6-866e-88f002d67824",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "x-goog-api-key",
+              "value": "AIzaSyD9VODmWs8FyZL-tFHPJ61lIDeMHpVTkl0"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"contents\": [\n        {\n            \"parts\": [\n           {\n                              \"text\": \"{{ $('On form submission').item.json.Prompt }}\"\n            },\n                {\n                    \"inlineData\": {\n                        \"mimeType\": \"{{ $('On form submission').item.json.File[0].mimetype }}\",\n                        \"data\": \"{{ $json.data }}\"\n                    }\n                }\n               \n            ]\n        }\n    ],\n    \"generationConfig\": {\n        \"responseModalities\": [\n            \"IMAGE\"\n        ]\n    }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -16,
+        -96
+      ],
+      "id": "279cae1c-ad36-4b77-a417-b48b029e72ec",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "candidates[0].content.parts[0].inlineData.data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        192,
+        -96
+      ],
+      "id": "116a5d77-db5e-480c-a7bc-9882ca3697df",
+      "name": "Convert to File",
+      "alwaysOutputData": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e249b8be-8fb7-4678-841a-bc14d262ac85",
+  "meta": {
+    "instanceId": "e6ecfdc46bac42ecbc2672ed3f1eb11f19b35b05eae5e305021f1de242e4347b"
+  },
+  "id": "x4EbubQ0FEIyvfAu",
+  "tags": []
+}
